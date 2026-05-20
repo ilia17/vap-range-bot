@@ -135,6 +135,13 @@ def refresh_value_area(state: BotState):
     state.va = va
     state.add_log(f"VA → VAH {va.vah:.2f}  POC {va.poc:.2f}  VAL {va.val:.2f}", "ok")
 
+    # Seed the price history chart from the candles we already have.
+    # Without this the chart stays blank until enough ticks accumulate — which
+    # at 15m intervals would take 45+ minutes to render 3 points.
+    closes = candles["close"].tolist()
+    state.price_history = [float(c) for c in closes[-200:]]
+    state.add_log(f"Chart seeded with {len(state.price_history)} candles", "info")
+
 
 async def bot_loop(state: BotState):
     strategy              = BalancedMarketStrategy()
